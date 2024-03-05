@@ -105,11 +105,6 @@ defmodule Slack.Socket do
     bot.bot_module.handle_event(type, event)
   end
 
-  defp handle_interactive_event(type, event, bot) do
-    Logger.debug("[Slack.Socket] Sending #{type} event to #{bot.bot_module}")
-    bot.bot_module.handle_event(type, event)
-  end
-
   defp handle_bot_joined(%{"channel" => channel} = _event, bot) do
     Slack.ChannelServer.join(bot, channel)
   end
