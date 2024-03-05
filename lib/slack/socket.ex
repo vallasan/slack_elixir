@@ -44,7 +44,7 @@ defmodule Slack.Socket do
 
         {:reply, ack_frame(msg), state}
 
-      {:ok, %{"type" => "interactive", "payload" => %{"type" => event_type, "actions" => actions, "user" => user}} = msg} ->
+      {:ok, %{"type" => "interactive", "payload" => %{"type" => event_type}} = msg} ->
         Logger.debug("[Slack.Socket] interactive action: #{inspect(msg)}")
 
         Task.Supervisor.start_child(
