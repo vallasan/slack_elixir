@@ -44,15 +44,15 @@ defmodule Slack.Socket do
 
         {:reply, ack_frame(msg), state}
 
-        {:ok, %{"type" => "block_actions", "payload" => payload} = msg} ->
-          Logger.debug("[Slack.Socket] block_actions: #{inspect(msg)}")
+      {:ok, %{"type" => "interactive", "payload" => %{"type" => event_type, "actions" => actions}} = msg} ->
+        Logger.debug("[Slack.Socket] interactive action : #{inspect(msg)}")
 
-          Task.Supervisor.start_child(
-            {:via, PartitionSupervisor, {Slack.TaskSupervisors, self()}},
-            fn -> handle_block_actions(payload, state.bot) end
-          )
+        Task.Supervisor.start_child(
+          {:via, PartitionSupervisor, {Slack.TaskSupervisors, self()}},
+          fn -> handle_interactive_event(event_type, actions, state.bot) end
+        )
 
-          {:reply, ack_frame(msg), state}
+        {:reply, ack_frame(msg), state}
       _ ->
         Logger.debug("[Slack.Socket] Unhandled payload: #{msg}")
         {:ok, state}
@@ -105,9 +105,9 @@ defmodule Slack.Socket do
     bot.bot_module.handle_event(type, event)
   end
 
-  defp handle_block_actions(payload, bot) do
-    Logger.debug("[Slack.Socket] Sending \"block_actions\" event to #{bot.bot_module}")
-    bot.bot_module.handle_event("block_actions", payload)
+  defp handle_interactive_event(type, event, bot) do
+    Logger.debug("[Slack.Socket] Sending #{type} event to #{bot.bot_module}")
+    bot.bot_module.handle_event(type, event)
   end
 
   defp handle_bot_joined(%{"channel" => channel} = _event, bot) do
