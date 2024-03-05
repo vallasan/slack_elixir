@@ -49,7 +49,7 @@ defmodule Slack.Socket do
 
         Task.Supervisor.start_child(
           {:via, PartitionSupervisor, {Slack.TaskSupervisors, self()}},
-          fn -> handle_slack_event(event_type, msg, state.bot) end
+          fn -> handle_slack_event(event_type, msg["payload"], state.bot) end
         )
 
         {:reply, ack_frame(msg), state}
