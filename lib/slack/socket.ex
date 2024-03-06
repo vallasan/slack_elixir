@@ -96,7 +96,7 @@ defmodule Slack.Socket do
   end
 
   @allowed_event_ids ["jira_update", "github_update"]
-  defp handle_slack_event(type, %{"user" => user, "event_id" => event_id} = event, %{user_id: user_id}, bot) do
+  defp handle_slack_event(type, %{"event_id" => event_id} = event, %{user_id: user_id}, bot) do
     if event_id in @allowed_event_ids do
       Logger.debug("[Slack.Socket] Sending #{event_id} event to #{bot.bot_module}")
       bot.bot_module.handle_event(type, event)
