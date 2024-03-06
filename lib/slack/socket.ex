@@ -36,6 +36,16 @@ defmodule Slack.Socket do
 
       {:ok, %{"payload" => %{"event" => event}} = msg} ->
         #Logger.debug("[Slack.Socket] message: #{inspect(msg)}")
+        text_map = case event["text"] do
+          text when is_binary(text) ->
+            case Jason.decode(text) do
+              {:ok, map} -> map
+              {:error, _reason} -> nil
+            end
+          _ -> nil
+        end
+
+        event = if text_map, do: Map.put(event, "text", text_map), else: event
         IO.inspect(event)
         Task.Supervisor.start_child(
           {:via, PartitionSupervisor, {Slack.TaskSupervisors, self()}},
