@@ -36,7 +36,7 @@ defmodule Slack.Socket do
 
       {:ok, %{"payload" => %{"event" => event}} = msg} ->
         #Logger.debug("[Slack.Socket] message: #{inspect(msg)}")
-        IO.inspect(Jason.encode!(event))
+        IO.inspect(event)
         Task.Supervisor.start_child(
           {:via, PartitionSupervisor, {Slack.TaskSupervisors, self()}},
           fn -> handle_slack_event(event["type"], event, state.bot) end
