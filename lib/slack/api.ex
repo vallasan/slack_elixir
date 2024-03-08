@@ -44,7 +44,8 @@ defmodule Slack.API do
     result =
       Req.post(client(token),
         url: endpoint,
-        form: args
+        #form: args
+        body: Jason.encode!(args)
       )
 
     case result do
