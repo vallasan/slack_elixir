@@ -41,13 +41,11 @@ defmodule Slack.API do
   """
   @spec post(String.t(), String.t(), map() | keyword()) :: {:ok, map()} | {:error, term()}
   def post(endpoint, token, args \\ %{}) do
-    if endpoint == "chat.postMessage" do
       result =
-      Req.post(client(token),
-        url: endpoint,
-        form: args
-        #body: Jason.encode!(args)
-      )
+        Req.post(client(token),
+          url: endpoint,
+          form: args
+        )
       case result do
         {:ok, %{body: %{"ok" => true} = body}} ->
           {:ok, body}
@@ -56,22 +54,6 @@ defmodule Slack.API do
           Logger.error(inspect(error))
           {:error, error}
       end
-    else
-      result =
-      Req.post(client(token),
-        url: endpoint,
-        #form: args
-        body: Jason.encode!(args)
-      )
-      case result do
-        {:ok, %{body: %{"ok" => true} = body}} ->
-          {:ok, body}
-
-        {_, error} ->
-          Logger.error(inspect(error))
-          {:error, error}
-      end
-    end
   end
 
   @doc """
