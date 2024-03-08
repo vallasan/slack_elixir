@@ -48,6 +48,14 @@ defmodule Slack.API do
         form: args
         #body: Jason.encode!(args)
       )
+      case result do
+        {:ok, %{body: %{"ok" => true} = body}} ->
+          {:ok, body}
+
+        {_, error} ->
+          Logger.error(inspect(error))
+          {:error, error}
+      end
     else
       result =
       Req.post(client(token),
@@ -55,14 +63,14 @@ defmodule Slack.API do
         #form: args
         body: Jason.encode!(args)
       )
-    end
-    case result do
-      {:ok, %{body: %{"ok" => true} = body}} ->
-        {:ok, body}
+      case result do
+        {:ok, %{body: %{"ok" => true} = body}} ->
+          {:ok, body}
 
-      {_, error} ->
-        Logger.error(inspect(error))
-        {:error, error}
+        {_, error} ->
+          Logger.error(inspect(error))
+          {:error, error}
+      end
     end
   end
 
