@@ -41,17 +41,20 @@ defmodule Slack.API do
   """
   @spec post(String.t(), String.t(), map() | keyword()) :: {:ok, map()} | {:error, term()}
   def post(endpoint, token, args \\ %{}) do
-      result =
-        Req.post(client(token),
+      #result =
+      case Req.post(client(token),
           url: endpoint,
           form: args
-        )
-      Logger.error(inspect(result))
-      case result do
-        {:ok, %{body: %{"ok" => true} = body}} ->
+      ) do
+        {:ok, %Req.Response{status: 200, body: body}} ->
+          Logger.debug("View published successfully: #{inspect(body)}")
           {:ok, body}
 
-        {_, error} ->
+      #case result do
+        #{:ok, %{body: %{"ok" => true} = body}} ->
+          #{:ok, body}
+
+        {:error, error} ->
           Logger.error(inspect(error))
           {:error, error}
       end
