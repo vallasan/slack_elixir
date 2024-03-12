@@ -46,6 +46,7 @@ defmodule Slack.API do
           url: endpoint,
           form: args
         )
+      Logger.error(inspect(result))
       case result do
         {:ok, %{body: %{"ok" => true} = body}} ->
           {:ok, body}
