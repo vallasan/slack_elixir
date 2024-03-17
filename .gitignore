@@ -30,3 +30,4 @@ slack_elixir-*.tar
 /priv/plts/*.plt.hash
 
 mix.lock
+.tool-versions
