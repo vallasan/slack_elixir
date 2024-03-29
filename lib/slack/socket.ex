@@ -34,7 +34,7 @@ defmodule Slack.Socket do
         Logger.info("[Slack.Socket] hello: #{inspect(hello)}")
         {:ok, state}
 
-      {:ok, %{"payload" => %{"event" => event}, "team_id" => team_id} = msg} ->
+      {:ok, %{"payload" => %{"event" => event, "team_id" => team_id}} = msg} ->
         Logger.debug("[Slack.Socket] message: #{inspect(msg)}")
         text_map = case event["text"] do
           text when is_binary(text) ->
