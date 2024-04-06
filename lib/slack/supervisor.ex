@@ -17,7 +17,6 @@ defmodule Slack.Supervisor do
 
   @impl true
   def init(bot_config) do
-    Logger.error(inspect(bot_config, pretty: true))
     {app_token, bot_config} = Keyword.pop!(bot_config, :app_token)
     {bot_token, bot_config} = Keyword.pop!(bot_config, :bot_token)
     {bot_module, bot_config} = Keyword.pop!(bot_config, :bot)

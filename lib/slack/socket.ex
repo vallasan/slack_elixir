@@ -15,7 +15,7 @@ defmodule Slack.Socket do
       bot_token: bot_token,
       bot: bot
     }
-
+    Logger.error(inspect(state, pretty: true))
     {:ok, %{"url" => url}} = Slack.API.post("apps.connections.open", state.app_token)
 
     Logger.info("[Slack.Socket] connecting...")
