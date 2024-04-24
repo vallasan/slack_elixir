@@ -48,7 +48,9 @@ defmodule Slack.API do
       case result do
         {:ok, %{body: %{"ok" => true} = body}} ->
           {:ok, body}
-
+        {:ok, %{body: %{"ok" => false} = body}} ->
+          Logger.error(inspect(body))
+          {:error, body}
         {:error, error} ->
           Logger.error(inspect(error))
           {:error, error}
