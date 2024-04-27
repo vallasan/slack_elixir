@@ -104,12 +104,9 @@ defmodule Slack.Socket do
     bot.bot_module.handle_event(type, event)
   end
 
-  @allowed_event_ids ["jira_update", "github_update"]
   defp handle_slack_event(type, %{"text" => %{"event_id" => event_id}} = event, bot) do
-    if event_id in @allowed_event_ids do
-      Logger.debug("[Slack.Socket] Sending #{event_id} event to #{bot.bot_module}")
-      bot.bot_module.handle_event(type, event)
-    end
+    Logger.debug("[Slack.Socket] Sending #{event_id} event to #{bot.bot_module}")
+    bot.bot_module.handle_event(type, event)
   end
 
   # Ignore messages from yourself...
