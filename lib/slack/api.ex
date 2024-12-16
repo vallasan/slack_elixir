@@ -51,6 +51,8 @@ defmodule Slack.API do
         {:ok, %{body: %{"ok" => false} = body}} ->
           Logger.error(inspect(body))
           {:error, body}
+        {:ok, %Req.Response{status: 200} = body} ->
+          {:ok, body}
         {:error, error} ->
           Logger.error(inspect(error))
           {:error, error}
