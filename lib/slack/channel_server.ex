@@ -41,13 +41,13 @@ defmodule Slack.ChannelServer do
   # ----------------------------------------------------------------------------
 
   @impl true
-  def init({token, bot, channels_or_types}) do
+  def init({token, bot, channel_types}) do
     state = %{
       bot: bot,
       channels: [],
       token: token,
       pending_channels: [],
-      channels_or_types: channels_or_types
+      channel_types: channel_types
     }
 
     {:ok, state, {:continue, :fetch_channels}}
