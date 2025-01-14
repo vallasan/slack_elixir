@@ -126,6 +126,5 @@ defmodule Slack.ChannelServer do
       limit: 100  # Reduced batch size for API calls
     })
     |> Stream.map(& &1["id"])
-    |> Enum.to_list()
   end
 end
