@@ -9,6 +9,8 @@ defmodule Slack.ChannelServer do
   # Note, these require the following scopes:
   #   `channels:read`, `groups:read`, `im:read`, `mpim:read`
   @default_channel_types "public_channel,private_channel,mpim,im"
+  @batch_size 10
+  @batch_delay 200
 
   # ----------------------------------------------------------------------------
   # Public API
@@ -43,33 +45,65 @@ defmodule Slack.ChannelServer do
   # ----------------------------------------------------------------------------
 
   @impl true
-  def init({token, bot, channels}) do
+  def init({token, bot, channel_types}) do
     state = %{
       bot: bot,
-      channels: channels,
-      token: token
+      channels: [],
+      token: token,
+      channel_types: channel_types,
+      pending_channels: []
     }
 
-    {:ok, state, {:continue, :join}}
+    {:ok, state, {:continue, :fetch_channels}}
   end
 
   @impl true
-  def handle_continue(:join, state) do
-    Enum.each(state.channels, &join(state.bot, &1))
+  def handle_continue(:fetch_channels, state) do
+    channels = fetch_channels(state.token, state.channel_types)
+    {:noreply, %{state | pending_channels: channels}, {:continue, :process_channels}}
+  end
+
+  @impl true
+  def handle_continue(:process_channels, %{pending_channels: []} = state) do
+    Logger.info("[Slack.ChannelServer] Finished processing all channels")
     {:noreply, state}
+  end
+
+  @impl true
+  def handle_continue(:process_channels, %{pending_channels: pending} = state) do
+    {batch, remaining} = Enum.split(pending, @batch_size)
+
+    # Process each channel in the batch with delay
+    Enum.each(batch, fn channel ->
+      Logger.info("[Slack.ChannelServer] #{state.bot.bot_module} joining #{channel}...")
+      {:ok, _} = Slack.MessageServer.start_supervised(state.token, state.bot, channel)
+      Process.sleep(@batch_delay)
+    end)
+
+    new_state = %{state |
+      channels: state.channels ++ batch,
+      pending_channels: remaining
+    }
+
+    if remaining == [] do
+      {:noreply, new_state}
+    else
+      {:noreply, new_state, {:continue, :process_channels}}
+    end
   end
 
   @impl true
   def handle_cast({:join, channel}, state) do
     Logger.info("[Slack.ChannelServer] #{state.bot.bot_module} joining #{channel}...")
     {:ok, _} = Slack.MessageServer.start_supervised(state.token, state.bot, channel)
-    {:noreply, Map.update!(state, :channels, &[channel | &1])}
+    {:noreply, %{state | channels: [channel | state.channels]}}
   end
 
+  @impl true
   def handle_cast({:part, channel}, state) do
     Logger.info("[Slack.ChannelServer] #{state.bot.bot_module} leaving #{channel}...")
     :ok = Slack.MessageServer.stop(state.bot, channel)
-    {:noreply, Map.update!(state, :channels, &List.delete(&1, channel))}
+    {:noreply, %{state | channels: List.delete(state.channels, channel)}}
   end
 
   defp via_tuple(%Slack.Bot{bot_module: bot}) do
@@ -78,7 +112,10 @@ defmodule Slack.ChannelServer do
 
   defp fetch_channels(token, types) when is_binary(types) do
     "users.conversations"
-    |> Slack.API.stream(token, "channels", types: types)
+    |> Slack.API.stream(token, "channels", %{
+      types: types,
+      limit: 200  # Reduced batch size for API calls
+    })
     |> Enum.map(& &1["id"])
   end
 end
