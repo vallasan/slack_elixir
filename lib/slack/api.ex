@@ -20,6 +20,7 @@ defmodule Slack.API do
   """
   @spec get(String.t(), String.t(), map() | keyword()) :: {:ok, map()} | {:error, term()}
   def get(endpoint, token, args \\ %{}) do
+    Logger.info("Executing Slack API get to #{endpoint}")
     result =
       Req.get(client(token),
         url: endpoint,
@@ -28,10 +29,12 @@ defmodule Slack.API do
 
     case result do
       {:ok, %{body: %{"ok" => true} = body}} ->
+        Logger.info("Slack API get to #{endpoint} finished")
         {:ok, body}
 
       {_, error} ->
         Logger.error(inspect(error))
+        Logger.info("Slack API get to #{endpoint} finished with error")
         {:error, error}
     end
   end
@@ -41,19 +44,24 @@ defmodule Slack.API do
   """
   @spec post(String.t(), String.t(), map() | keyword()) :: {:ok, map()} | {:error, term()}
   def post(endpoint, token, args \\ %{}) do
+    Logger.info("Executing Slack API post to #{endpoint}")
       result = Req.post(client(token),
           url: endpoint,
           form: args
       )
       case result do
         {:ok, %{body: %{"ok" => true} = body}} ->
+          Logger.info("Slack API post to #{endpoint} finished")
           {:ok, body}
         {:ok, %{body: %{"ok" => false} = body}} ->
           Logger.error(inspect(body))
+          Logger.info("Slack API post to #{endpoint} finished with error")
           {:error, body}
         {:ok, %Req.Response{status: 200} = body} ->
+          Logger.info("Slack API post to #{endpoint} finished")
           {:ok, body}
         {:error, error} ->
+          Logger.info("Slack API post to #{endpoint} finished with error")
           Logger.error(inspect(error))
           {:error, error}
       end
