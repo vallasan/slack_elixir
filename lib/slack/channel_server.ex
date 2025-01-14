@@ -115,7 +115,7 @@ defmodule Slack.ChannelServer do
     "users.conversations"
     |> Slack.API.stream(token, "channels", %{
       types: types,
-      limit: 100  # Reduced batch size for API calls
+      limit: 999
     })
     |> Stream.map(& &1["id"])
   end

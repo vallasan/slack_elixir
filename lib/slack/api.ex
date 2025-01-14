@@ -72,29 +72,41 @@ defmodule Slack.API do
       args
       |> Map.new()
       |> Map.pop(:next_cursor, nil)
+      |> IO.inspect(label: "Initial cursor and args")
 
     Stream.resource(
       # start_fun
-      fn -> starting_cursor end,
+      fn ->
+        IO.inspect(starting_cursor, label: "Starting cursor")
+        starting_cursor
+      end,
 
       # next_fun
       fn
         "" ->
+          IO.inspect("Empty cursor - halting", label: "Stream state")
           {:halt, nil}
 
         cursor ->
-          case get(endpoint, token, Map.merge(args, %{next_cursor: cursor})) do
+          IO.inspect(cursor, label: "Current cursor")
+          merged_args = Map.merge(args, %{next_cursor: cursor})
+          IO.inspect(merged_args, label: "Request args")
+          case get(endpoint, token, merged_args) do
             {:ok, %{"ok" => true, ^resource => data} = body} ->
-              cursor = get_in(body, ["response_metadata", "next_cursor"]) || ""
-              {data, cursor}
+              next_cursor = get_in(body, ["response_metadata", "next_cursor"]) || ""
+              IO.inspect(data, label: "Received data")
+              IO.inspect(next_cursor, label: "Next cursor")
+              {data, next_cursor}
 
             {_, error} ->
+              IO.inspect(error, label: "Error in stream")
               raise "Error fetching #{resource}: #{inspect(error)}"
           end
       end,
 
       # end_fun
       fn acc ->
+        IO.inspect(acc, label: "Stream ended with accumulator")
         acc
       end
     )
