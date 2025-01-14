@@ -73,8 +73,9 @@ defmodule Slack.ChannelServer do
     Enum.each(batch, fn channel ->
       Logger.info("[Slack.ChannelServer] #{state.bot.bot_module} joining #{channel}...")
       {:ok, _} = Slack.MessageServer.start_supervised(state.token, state.bot, channel)
-      Process.sleep(@batch_delay)
     end)
+
+    Process.sleep(@batch_delay)
 
     new_state = %{state |
       channels: state.channels ++ batch,
