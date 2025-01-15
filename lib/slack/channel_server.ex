@@ -36,8 +36,13 @@ defmodule Slack.ChannelServer do
     GenServer.cast(via_tuple(bot), {:part, channel})
   end
 
-  def get_bot(bot_module) do
-    GenServer.call(via_tuple(%Slack.Bot{bot_module: bot_module}), :get_bot)
+  def get_bot(bot) do
+    case Registry.lookup(Slack.ChannelServerRegistry, bot) do
+      [{pid, _}] ->
+        GenServer.call(pid, :get_bot)
+      [] ->
+        {:error, :not_found}
+    end
   end
   # ----------------------------------------------------------------------------
   # GenServer Callbacks
