@@ -39,7 +39,10 @@ defmodule Slack.ChannelServer do
   def get_bot(bot) do
     case Registry.lookup(Slack.ChannelServerRegistry, bot) do
       [{pid, _}] ->
-        GenServer.call(pid, :get_bot)
+        case GenServer.call(pid, :get_bot) do
+          %Slack.Bot{} = bot -> {:ok, bot}
+          other -> {:error, {:unexpected_response, other}}
+        end
       [] ->
         {:error, :not_found}
     end
