@@ -7,11 +7,12 @@ defmodule Slack.Bot do
           bot_id: String.t(),
           bot_module: module(),
           team_id: String.t(),
-          user_id: String.t()
+          user_id: String.t(),
+          workspace_url: String.t()
         }
 
-  @enforce_keys [:bot_id, :bot_module, :team_id, :user_id]
-  defstruct [:bot_id, :bot_module, :team_id, :user_id]
+  @enforce_keys [:bot_id, :bot_module, :team_id, :user_id, :workspace_url]
+  defstruct [:bot_id, :bot_module, :team_id, :user_id, :workspace_url]
 
   @doc """
   Handle the event from Slack.
@@ -33,7 +34,8 @@ defmodule Slack.Bot do
       bot_id: Map.fetch!(params, "bot_id"),
       bot_module: bot_module,
       team_id: Map.fetch!(params, "team_id"),
-      user_id: Map.fetch!(params, "user_id")
+      user_id: Map.fetch!(params, "user_id"),
+      workspace_url: Map.fetch!(params, "url"),
     }
   end
 
