@@ -36,6 +36,9 @@ defmodule Slack.ChannelServer do
     GenServer.cast(via_tuple(bot), {:part, channel})
   end
 
+  def get_bot(bot_module) do
+    GenServer.call(via_tuple(%Slack.Bot{bot_module: bot_module}), :get_bot)
+  end
   # ----------------------------------------------------------------------------
   # GenServer Callbacks
   # ----------------------------------------------------------------------------
@@ -101,6 +104,12 @@ defmodule Slack.ChannelServer do
     Logger.info("[Slack.ChannelServer] #{state.bot.bot_module} leaving #{channel}...")
     :ok = Slack.MessageServer.stop(state.bot, channel)
     {:noreply, %{state | channels: List.delete(state.channels, channel)}}
+  end
+
+
+  @impl true
+  def handle_call(:get_bot, _from, state) do
+    {:reply, state.bot, state}
   end
 
   # ----------------------------------------------------------------------------
