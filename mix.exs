@@ -8,7 +8,7 @@ defmodule Slack.MixProject do
     [
       app: :slack_elixir,
       version: @version,
-      elixir: "~> 1.14",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -37,8 +37,8 @@ defmodule Slack.MixProject do
     [
       # Direct dependencies.
       {:jason, "~> 1.4"},
-      {:req, "~> 0.4"},
-      {:websockex, "~> 0.4.3"},
+      {:req, "~> 0.5"},
+      {:websockex, git: "https://github.com/vallasan/websockex.git"},
 
       # Dev/test dependencies.
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
